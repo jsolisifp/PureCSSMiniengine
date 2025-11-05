@@ -431,7 +431,7 @@
     {
         return sprites[index];
     }
-    
+	
     function CreateSprite(file)
     {
         var index = sprites.length;
@@ -448,6 +448,16 @@
 
         return index;
     }    
+	
+	function HideSprite(index)
+	{
+		sprites[index].style.visibility = "hidden";
+	}
+	
+	function ShowSprite(index)
+	{
+		sprites[index].style.visibility = "visible";
+	}
     
     ///////////////////////////
     //        SCENE          //
