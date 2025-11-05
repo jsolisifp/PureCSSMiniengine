@@ -22,20 +22,22 @@
 
     // GetSprite(index)
     // CreateSprite(file)  => Returns sprite index
+	// ShowSprite(index)
+	// HideSprite(index)
 
     ////////////  INPUT ////////////////
 
-    // inputFireDown;
-    // inputLeftDown;
-    // inputRightDown;
-    // inputUpDown;
-    // inputDownDown;
+    // inputFireDown
+    // inputLeftDown
+    // inputRightDown
+    // inputUpDown
+    // inputDownDown
     // 
-    // inputFirePressed;
-    // inputLeftPressed;
-    // inputRightPressed;
-    // inputUpPressed;
-    // inputDownPressed;
+    // inputFirePressed
+    // inputLeftPressed
+    // inputRightPressed
+    // inputUpPressed
+    // inputDownPressed
     
     ////////////  SOUND ////////////////    
     
