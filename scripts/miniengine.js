@@ -423,7 +423,7 @@
             s.style.top = o.posY + "px";
             s.style.width = o.width + "px";
             s.style.height = o.height + "px";
-
+			
         }        
     }
     
@@ -544,7 +544,8 @@
     
     function StopSound(index)
     {
-        sounds[index].stop();
+        sounds[index].pause();
+		sounds[index].currentTime = 0
     }
     
     
