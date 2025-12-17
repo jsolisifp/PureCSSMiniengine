@@ -33,6 +33,8 @@
     /////////////
     
     var colliders;
+    var layerCollisionEnabled;
+    var numLayers = 10;
     
     // Collider types
     
@@ -183,6 +185,17 @@
     function InitPhysics()
     {
         colliders = new Array();
+
+        layerCollisionEnabled = new Array();
+
+        for(var i = 0; i < numLayers; i++)
+        {
+            layerCollisionEnabled[i] = new Array();
+            for(var j = 0; j < numLayers; j++)
+            {
+                layerCollisionEnabled[i][j] = true;
+            }                
+        }
     }    
     
     function PhysicsUpdate()
@@ -226,7 +239,7 @@
         return colliders[index];
     }
     
-    function CreateCollider(movementType, hasGravity)
+    function CreateCollider(movementType, hasGravity, layer)
     {
         var index = colliders.length;        
         var collider =
@@ -235,13 +248,69 @@
             speedX: 0,
             speedY: 0,
             bounciness: 0.5,
-            hasGravity: hasGravity
+            hasGravity: hasGravity,
+            layer:layer
+            
         }
         
         colliders.push(collider);
         
         return index;
-    }  
+    } 
+
+    function SetLayerCollisionEnabled(layer1, layer2, enabled)
+    {
+        layerCollisionEnabled[layer1][layer2] = enabled;
+        layerCollisionEnabled[layer2][layer1] = enabled;        
+    }
+    
+    function RayCast(originX, originY, dirX, dirY, maxDistance, layer)
+    {
+        var m = Math.sqrt(dirX * dirX + dirY * dirY);
+        dirX = dirX / m;
+        dirY = dirY / m;
+        
+        var steps = Math.floor(maxDistance);
+        
+        var x = originX;
+        var y = originY;
+        
+        var found = false;
+        var distance = 0;
+        
+        var result = -1;
+        
+        while(!found && distance < maxDistance)
+        {
+            var i = 0;
+            while(i < objects.length && !found)
+            {
+                var o = objects[i];
+                if(o.collider >= 0)
+                {
+                    var c = colliders[o.collider];
+                    
+                    if(c.layer == layer && x >= o.posX && x <= o.posX + o.width && y >= o.posY && y <= o.posY + o.height)
+                    {
+                        console.log("RayCast hits " + i);
+                        result = i;
+                        found = true;
+                    }
+                    else
+                    {
+                        x += dirX;
+                        y += dirY;
+                        distance ++;
+                    }
+                    
+                }
+            }
+        }
+        
+        return result;
+        
+        
+    }
 
     function Check1DOverlap(a1, aw, b1, bw)
     {
@@ -284,6 +353,23 @@
     
     }
     
+    function CheckLayer(index1, index2)
+    {
+        var o1 = objects[index1];
+        var o2 = objects[index2];
+        
+        var result = false;
+        
+        if(o1.collider >= 0 && o2.collider >= 0)
+        {
+            var c1 = colliders[o1.collider];
+            var c2 = colliders[o2.collider];
+            result = layerCollisionEnabled[c1.layer][c2.layer];
+        }
+        
+        return result;        
+    }
+    
     function CreateCollision(index1, index2)
     {
         var o1 = objects[index1];
@@ -316,16 +402,19 @@
             {
                 if(i != j)
                 {
-                    if(CheckOverlap(i, j))
+                    if(CheckLayer(i, j))
                     {
-                        var found = false;
-                        var k = 0;
-                        while(!found && k < collisions.length) { if(collisions[k].index1 == j && collisions[k].index2 == i) { found = true; } else { k++; }}
-                        
-                        if(!found)
+                        if(CheckOverlap(i, j))
                         {
-                            var c = CreateCollision(i, j);
-                            collisions.push(c);
+                            var found = false;
+                            var k = 0;
+                            while(!found && k < collisions.length) { if(collisions[k].index1 == j && collisions[k].index2 == i) { found = true; } else { k++; }}
+                            
+                            if(!found)
+                            {
+                                var c = CreateCollision(i, j);
+                                collisions.push(c);
+                            }
                         }
                     }
                 }

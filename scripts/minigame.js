@@ -17,6 +17,7 @@
     
     // GetCollider(index)
     // CreateCollider(movementType, hasGravity) => Returns collider index
+    // SetLayerCollisionEnabled(layer1, layer2, enabled) => Allows or disallows collisions between layer1 and 2
     
     ////////////  RENDER ////////////////
 
@@ -55,7 +56,7 @@
     ///////////////////////////////////////////////////
     
     var objectTypeCharacter = 0;
-    var objectTypeBall = 1;
+    var objectTypeBox = 1;
     var objectTypePlatform = 2;
     var objectTypeMusic = 3;
 
@@ -69,7 +70,7 @@
         
         for(var i = 0; i < 20; i++)
         {
-            CreateObject("ball", objectTypeBall, UtilsRandomRange(200, 700), UtilsRandomRange(100, 400), 50, 50);
+            CreateObject("ball", objectTypeBox, UtilsRandomRange(200, 700), UtilsRandomRange(100, 400), 50, 50);
         }
 
         CreateObject("music", objectTypeMusic, 0, 0, 0, 0);        
@@ -77,7 +78,8 @@
         CreateObject("floor", objectTypePlatform, 0, 500, 900, 100);        
         CreateObject("wallLeft", objectTypePlatform, 0, 100, 100, 400);        
         CreateObject("wallRight", objectTypePlatform, 800, 100, 100, 400);        
-        CreateObject("ceiling", objectTypePlatform, 0, 0, 900, 100);        
+        CreateObject("ceiling", objectTypePlatform, 0, 0, 900, 100);    
+
     }
     
     ///////////////////////////////////////////////////
@@ -91,18 +93,18 @@
         if(o.type == objectTypeCharacter)
         {
             o.sprite = CreateSprite("reference.png");
-            o.collider = CreateCollider(bodyTypeKinematic, false);
+            o.collider = CreateCollider(bodyTypeKinematic, false, 0);
         }
-        else if(o.type == objectTypeBall)
+        else if(o.type == objectTypeBox)
         {
             o.sprite = CreateSprite("reference.png");
-            o.collider = CreateCollider(bodyTypeDynamic, true);
+            o.collider = CreateCollider(bodyTypeDynamic, true, 1);
             o.sound = CreateSound("reference-sound.wav", false);
         }
         else if(o.type == objectTypePlatform)
         {
             o.sprite = CreateSprite("reference.png");
-            o.collider = CreateCollider(bodyTypeKinematic, false);
+            o.collider = CreateCollider(bodyTypeKinematic, false, 2);
         }
         else if(o.type == objectTypeMusic)
         {
@@ -126,6 +128,17 @@
             if(inputRightPressed) { o.posX += 200 * timeStep; }
             if(inputUpPressed) { o.posY += -200 * timeStep; }
             if(inputDownPressed) { o.posY += 200 * timeStep; }
+            
+            var target = RayCast(o.posX, o.posY, 1, 0, 1000, 1);
+            
+            if(target >= 0)
+            {
+                var targetObject = GetObject(target);
+                var collider = GetCollider(targetObject.collider);
+                
+                collider.speedY = 200;                
+                
+            }
         }
         else if(o.type == objectTypeMusic)
         {
@@ -164,7 +177,7 @@
     
     function OnObjectCollision(object, otherObject)
     {
-        if(object.type == objectTypeBall)
+        if(object.type == objectTypeBox)
         {       
             var c = GetCollider(object.collider);
             
