@@ -17,7 +17,7 @@
     
     // GetCollider(index)
     // CreateCollider(movementType, hasGravity) => Returns collider index
-    // SetLayerCollisionEnabled(layer1, layer2, enabled) => Allows or disallows collisions between layer1 and 2
+    // SetCollisionEnabled(objectType1, objectType2, enabled) => Allows or disallows collisions between object types
     
     ////////////  RENDER ////////////////
 
@@ -59,6 +59,7 @@
     var objectTypeBox = 1;
     var objectTypePlatform = 2;
     var objectTypeMusic = 3;
+	var objectTypeInstructions = 4;
 
     ///////////////////////////////////////////////////
     //              CREATE YOUR SCENE                //
@@ -80,6 +81,7 @@
         CreateObject("wallRight", objectTypePlatform, 800, 100, 100, 400);        
         CreateObject("ceiling", objectTypePlatform, 0, 0, 900, 100);    
 
+        CreateObject("staticText", objectTypeInstructions, 200, 200, 500, 200);    
     }
     
     ///////////////////////////////////////////////////
@@ -92,24 +94,31 @@
         
         if(o.type == objectTypeCharacter)
         {
-            o.sprite = CreateSprite("reference.png");
-            o.collider = CreateCollider(bodyTypeKinematic, false, 0);
+            o.sprite = CreateSprite("reference.png", "PlayerSprite");
+			o.text = CreateText("Player", "PlayerText");
+            o.collider = CreateCollider(bodyTypeKinematic, false);
         }
         else if(o.type == objectTypeBox)
         {
-            o.sprite = CreateSprite("reference.png");
-            o.collider = CreateCollider(bodyTypeDynamic, true, 1);
+            o.sprite = CreateSprite("reference.png", "BoxSprite");
+			o.text = CreateText("Dynamic box", "BoxText");
+            o.collider = CreateCollider(bodyTypeDynamic, true);
             o.sound = CreateSound("reference-sound.wav", false);
         }
         else if(o.type == objectTypePlatform)
         {
-            o.sprite = CreateSprite("reference.png");
-            o.collider = CreateCollider(bodyTypeKinematic, false, 2);
+            o.sprite = CreateSprite("reference.png", "PlatformSprite");
+			o.text = CreateText("Platform", "PlatformText");
+            o.collider = CreateCollider(bodyTypeKinematic, false);
         }
         else if(o.type == objectTypeMusic)
         {
             o.music = CreateSound("reference-music.wav", true);
             o.isPlaying = false;
+        }
+        else if(o.type == objectTypeInstructions)
+        {
+            o.text = CreateText("Move with WASD. Enable sound with space.", "InstructionsText");
         }
         
     }
@@ -136,7 +145,7 @@
                 var targetObject = GetObject(target);
                 var collider = GetCollider(targetObject.collider);
                 
-                collider.speedY = 200;                
+                collider.speedY = -200;                
                 
             }
         }

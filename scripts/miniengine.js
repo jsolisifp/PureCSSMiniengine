@@ -21,6 +21,7 @@
     /////////////
     
     var objects;
+    var numObjectTypes = 32;
     
     /////////////
     // Render  //
@@ -33,8 +34,7 @@
     /////////////
     
     var colliders;
-    var layerCollisionEnabled;
-    var numLayers = 10;
+    var collisionEnabled;
     
     // Collider types
     
@@ -42,6 +42,12 @@
     var bodyTypeKinematic = 1;
     
     var gravity = 500.0;
+
+    /////////////
+    // Texts   //
+    /////////////
+    
+    var texts;
 
     /////////////
     // Sound   //
@@ -186,14 +192,14 @@
     {
         colliders = new Array();
 
-        layerCollisionEnabled = new Array();
+        collisionEnabled = new Array();
 
-        for(var i = 0; i < numLayers; i++)
+        for(var i = 0; i < numObjectTypes; i++)
         {
-            layerCollisionEnabled[i] = new Array();
-            for(var j = 0; j < numLayers; j++)
+            collisionEnabled[i] = new Array();
+            for(var j = 0; j < numObjectTypes; j++)
             {
-                layerCollisionEnabled[i][j] = true;
+                collisionEnabled[i][j] = true;
             }                
         }
     }    
@@ -239,7 +245,7 @@
         return colliders[index];
     }
     
-    function CreateCollider(movementType, hasGravity, layer)
+    function CreateCollider(movementType, hasGravity)
     {
         var index = colliders.length;        
         var collider =
@@ -248,8 +254,7 @@
             speedX: 0,
             speedY: 0,
             bounciness: 0.5,
-            hasGravity: hasGravity,
-            layer:layer
+            hasGravity: hasGravity
             
         }
         
@@ -258,13 +263,13 @@
         return index;
     } 
 
-    function SetLayerCollisionEnabled(layer1, layer2, enabled)
+    function SetCollisionEnabled(objectType1, objectType2, enabled)
     {
-        layerCollisionEnabled[layer1][layer2] = enabled;
-        layerCollisionEnabled[layer2][layer1] = enabled;        
+        collisionEnabled[objectType1][objectType2] = enabled;
+        collisionEnabled[objectType2][objectType1] = enabled;        
     }
     
-    function RayCast(originX, originY, dirX, dirY, maxDistance, layer)
+    function RayCast(originX, originY, dirX, dirY, maxDistance, objectType)
     {
         var m = Math.sqrt(dirX * dirX + dirY * dirY);
         dirX = dirX / m;
@@ -286,24 +291,24 @@
             while(i < objects.length && !found)
             {
                 var o = objects[i];
-                if(o.collider >= 0)
+                if(o.type == objectType && o.collider >= 0)
                 {
                     var c = colliders[o.collider];
                     
-                    if(c.layer == layer && x >= o.posX && x <= o.posX + o.width && y >= o.posY && y <= o.posY + o.height)
+                    if(x >= o.posX && x <= o.posX + o.width && y >= o.posY && y <= o.posY + o.height)
                     {
-                        console.log("RayCast hits " + i);
                         result = i;
                         found = true;
-                    }
-                    else
-                    {
-                        x += dirX;
-                        y += dirY;
-                        distance ++;
-                    }
-                    
+                    }                    
                 }
+				
+				if(!found)
+				{
+					x = x + dirX;
+					y = y + dirY;
+					distance ++;
+					i++;
+				}
             }
         }
         
@@ -358,14 +363,7 @@
         var o1 = objects[index1];
         var o2 = objects[index2];
         
-        var result = false;
-        
-        if(o1.collider >= 0 && o2.collider >= 0)
-        {
-            var c1 = colliders[o1.collider];
-            var c2 = colliders[o2.collider];
-            result = layerCollisionEnabled[c1.layer][c2.layer];
-        }
+		var result = collisionEnabled[o1.type][o2.type];
         
         return result;        
     }
@@ -485,11 +483,12 @@
     
     ///////////////////////////
     //        RENDER         //
-    ///////////////////////////
+    /////////I//////////////////
     
     function InitRender()
     {
         sprites = new Array();
+		texts = new Array();
     }
         
     function RenderUpdate()
@@ -514,6 +513,15 @@
             s.style.height = o.height + "px";
 			
         }        
+
+        if(o.text >= 0)
+        {
+            var t = texts[o.text];
+
+            t.style.left = o.posX + "px";
+            t.style.top = o.posY + "px";
+			
+        }        
     }
     
     function GetSprite(index)
@@ -521,10 +529,11 @@
         return sprites[index];
     }
 	
-    function CreateSprite(file)
+    function CreateSprite(file, className)
     {
         var index = sprites.length;
         var image = document.createElement("img");
+		image.className = className;
         image.src = "images/" + file;
         image.style.position = "absolute";
         image.style.left = "0px";
@@ -593,6 +602,7 @@
             height: height,
             type: type,
             sprite: -1,
+			text: -1,
             collider: -1
         }
         
@@ -601,6 +611,44 @@
         return index;
     }
     
+    ///////////////////////////
+    //        TEXT           //
+    ///////////////////////////    
+    
+    
+	function CreateText(content, className)
+	{
+        var index = texts.length;
+        var text = document.createElement("div");
+		text.className = className;
+        text.innerHTML = content;
+		text.style.visibility = "visible";
+        text.style.position = "absolute";
+        text.style.left = "0px";
+        text.style.top = "0px";
+        texts.push(text);
+
+        minigame.appendChild(text);        
+        
+        return index;		
+	}
+	
+	function SetTextContent(index, content)
+	{
+		var text = texts[index];
+		text.innerHTML = content;
+	}
+		
+	function HideText(index)
+	{
+		texts[index].style.visibility = "hidden";
+	}
+	
+	function ShowText(index)
+	{
+		texts[index].style.visibility = "visible";
+	}
+
     ///////////////////////////
     //        SOUND          //
     ///////////////////////////    
